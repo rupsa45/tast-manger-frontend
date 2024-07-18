@@ -2,7 +2,7 @@ import axiosInstance from "./axiosConfig";
 const API_TASKS_URL = import.meta.env.VITE_API_TASKS_URL;
 
 const getAllTasks = async () => {
-  const response = await axiosInstance.get(API_TASKS_URL);
+  const response = await axiosInstance.get(`${API_TASKS_URL}`);
   return response.data;
 };
 
@@ -18,6 +18,7 @@ const updateTask = async (id, task) => {
 
 const deleteTask = async (id) => {
   const response = await axiosInstance.delete(`${API_TASKS_URL}/${id}`);
+  localStorage.getItem('token')
   return response.data;
 };
 

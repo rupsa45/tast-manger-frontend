@@ -19,7 +19,7 @@ import { useState } from "react";
 import { BiAddToQueue } from "react-icons/bi";
 import { createTask } from "../api/taskApi";
 
-export default function CreateUserModal() {
+export default function CreateUserModal({onTaskCreated}) {
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [inputs, setInputs] = useState({
@@ -39,18 +39,19 @@ export default function CreateUserModal() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await createTask(inputs);
+       await createTask(inputs);
+       onTaskCreated(inputs);
       onClose();
       toast({
-        title: 'Task created successfully.',
-        status: 'success',
+        title: "Task created successfully.",
+        status: "success",
         duration: 2000,
         isClosable: true,
       });
     } catch (error) {
-      console.error('Error creating task:', error);
+      console.error("Error creating task:", error);
       toast({
-        title: 'An error occurred.',
+        title: "An error occurred.",
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -65,7 +66,7 @@ export default function CreateUserModal() {
       </Button>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
-        <ModalContent as="form" onSubmit={handleSubmit}>
+        <ModalContent>
           <ModalHeader
             fontSize="2xl"
             fontWeight="bold"
@@ -113,7 +114,7 @@ export default function CreateUserModal() {
             </FormControl>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="teal" mr={3} type="submit">
+            <Button colorScheme="teal" mr={3} onClick={handleSubmit}>
               Save
             </Button>
             <Button onClick={onClose}>Cancel</Button>
