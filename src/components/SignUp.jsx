@@ -93,7 +93,7 @@ import {
               <Button colorScheme="blue" mt={6} type="submit" w="100%">
                 Sign Up
               </Button>
-              <div className="text-center">
+              <div>
                 <Link to="/login">
                   Access the{" "} Login 
                   area

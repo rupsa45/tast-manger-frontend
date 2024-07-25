@@ -1,52 +1,107 @@
 import { useEffect, useState } from "react";
-import { Flex, Grid, Spinner, Text } from "@chakra-ui/react";
+import { Flex, Grid, Spinner, Text, useToast } from "@chakra-ui/react";
 import UserCard from "./UserCard";
-import { getAllTasks, deleteTask, updateTask } from "../api/taskApi";
+import { getAllTasks, deleteTask, updateTask, getCompletedTasks, getIncompleteTasks } from "../api/taskApi";
 import CreateUserModal from "./CreateUserModal";
 
-const UserGrid = ({ onEdit }) => {
+const UserGrid = ({ filter }) => {
   const [tasks, setTasks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const toast = useToast();
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const data = await getAllTasks();
-        setTasks(data);
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error fetching tasks:", error);
-        setTasks([]);
-        setIsLoading(false);
-      }
-    };
-
     fetchTasks();
-  }, []);
+  }, [filter]);
+
+  const fetchTasks = async () => {
+    setIsLoading(true);
+    try {
+      let data;
+      if (filter === "completed") {
+        data = await getCompletedTasks();
+      } else if (filter === "incomplete") {
+        data = await getIncompleteTasks();
+      } else {
+        data = await getAllTasks();
+      }
+      setTasks(data);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      setTasks([]);
+      setIsLoading(false);
+    }
+  };
 
   const handleDelete = async (id) => {
     try {
       await deleteTask(id);
       setTasks((prevTasks) => prevTasks.filter((task) => task._id !== id));
+      toast({
+        title: "Task deleted successfully.",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
     } catch (error) {
       console.error("Error deleting task:", error);
+      toast({
+        title: "Error",
+        description: "There was an error while deleting the task.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     }
   };
 
   const handleToggleComplete = async (id) => {
     try {
       const task = tasks.find((task) => task._id === id);
-      if (task) {
-        const updatedTask = { ...task, completed: !task.completed };
-        await updateTask(id, updatedTask);
-        setTasks((prevTasks) =>
-          prevTasks.map((task) =>
-            task._id === id ? { ...task, completed: !task.completed } : task
-          )
-        );
+      if (!task) {
+        console.error(`Task with id ${id} not found`);
+        return;
       }
+      const updatedTask = { ...task, completed: !task.completed };
+      await updateTask(id, updatedTask);
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task._id === id ? { ...task, completed: !task.completed } : task
+        )
+      );
+    } catch (error) {
+      console.error("Error toggling task completion:", error);
+      toast({
+        title: "Error",
+        description: "There was an error while toggling the task completion.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleEdit = async (id, updatedTask) => {
+    try {
+      await updateTask(id, updatedTask);
+      setTasks((prevTasks) =>
+        prevTasks.map((task) => (task._id === id ? { ...task, ...updatedTask } : task))
+      );
+      toast({
+        title: "Task updated successfully.",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
     } catch (error) {
       console.error("Error updating task:", error);
+      toast({
+        title: "Error",
+        description: "There was an error while updating the task.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     }
   };
 
@@ -83,7 +138,7 @@ const UserGrid = ({ onEdit }) => {
             <UserCard
               key={task._id}
               user={task}
-              onEdit={onEdit}
+              onEdit={handleEdit}
               onDelete={handleDelete}
               onToggleComplete={handleToggleComplete}
             />

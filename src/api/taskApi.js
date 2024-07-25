@@ -18,7 +18,6 @@ const updateTask = async (id, task) => {
 
 const deleteTask = async (id) => {
   const response = await axiosInstance.delete(`${API_TASKS_URL}/${id}`);
-  localStorage.getItem('token')
   return response.data;
 };
 

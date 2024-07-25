@@ -1,5 +1,18 @@
-import { Card, CardHeader, CardBody, Flex, Box, Heading, Text, Switch, IconButton, useDisclosure, useToast } from "@chakra-ui/react";
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  Flex,
+  Box,
+  Heading,
+  Text,
+  Switch,
+  IconButton,
+  useDisclosure,
+  useToast,
+} from "@chakra-ui/react";
 import { BiEdit, BiTrash } from "react-icons/bi";
+import UpdateTaskModal from "./UpdateTaskModal";
 
 const UserCard = ({ user, onEdit, onDelete, onToggleComplete }) => {
   const toast = useToast();
@@ -7,7 +20,7 @@ const UserCard = ({ user, onEdit, onDelete, onToggleComplete }) => {
 
   const handleDelete = async () => {
     try {
-      await onDelete(user.id);
+      await onDelete(user._id);
       toast({
         title: "Task deleted successfully.",
         status: "success",
@@ -26,8 +39,7 @@ const UserCard = ({ user, onEdit, onDelete, onToggleComplete }) => {
   };
 
   return (
-    
-    <Card>
+    <Card mt={5}>
       <CardHeader>
         <Flex justify="space-between" alignItems="center">
           <Flex gap={4} alignItems="center">
@@ -40,7 +52,7 @@ const UserCard = ({ user, onEdit, onDelete, onToggleComplete }) => {
               size="md"
               colorScheme="teal"
               isChecked={user.completed}
-              onChange={() => onToggleComplete(user.id)}
+              onChange={() => onToggleComplete(user._id)}
             />
             <IconButton
               variant="ghost"
@@ -64,6 +76,12 @@ const UserCard = ({ user, onEdit, onDelete, onToggleComplete }) => {
       <CardBody>
         <Text>{user.description}</Text>
       </CardBody>
+      <UpdateTaskModal
+        isOpen={isOpen}
+        onClose={onClose}
+        user={user}
+        onEdit={onEdit}
+      />
     </Card>
   );
 };
